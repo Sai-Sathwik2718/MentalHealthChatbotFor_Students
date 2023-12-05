@@ -11,10 +11,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 const manager = new NlpManager({ languages: ['en'] });
-manager.addDocument('en', 'Hello','Wassup');
+manager.addDocument('en', 'Hello', 'Wassup');
 manager.addDocument('en', 'Hi', 'Hello');
 manager.addDocument('en', 'How are you?', 'I am fine');
-
 
 manager.train();
 
@@ -22,21 +21,21 @@ app.post('/processInput', (req, res) => {
   const userInput = req.body.userInput;
 
   // Process user input using node-nlp
-  manager.process('en', userInput)
-    .then(response => {
+  manager
+    .process('en', userInput)
+    .then((response) => {
       // Log the processed output for debugging
-      console.log('Processed Output:', {response});
-
+      console.log('Processed Output:', { response });
+      console.log('hello');
       // Send the processed output back to the user
       res.json({ output: response.intent });
     })
-    .catch(error => {
+    .catch((error) => {
+      console.log('hello error');
       console.error('Processing Error:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     });
 });
-
-
 
 // Set up a simple HTML form to take user input
 app.get('/', (req, res) => {
