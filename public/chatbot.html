@@ -3,97 +3,749 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Healhub</title>
-    <link href="css/styles.css" rel="stylesheet" />
+    <title>MindMate - Mental Health Chatbot</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo h1 {
+            color: #667eea;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-name {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 280px 1fr 300px;
+            gap: 20px;
+            min-height: calc(100vh - 140px);
+        }
+
+        .chat-history-panel {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-history-header {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .chat-history-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .chat-history-list {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            max-height: 600px;
+        }
+
+        .chat-history-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .chat-history-item:hover {
+            background: #e9ecef;
+            border-left-color: #27ae60;
+        }
+
+        .chat-history-item.active {
+            background: #d4edda;
+            border-left-color: #27ae60;
+        }
+
+        .chat-history-message {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .chat-history-time {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .chat-history-sender {
+            font-size: 11px;
+            color: #27ae60;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .chat-header h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 500px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 16px;
+        }
+
+        .message.user .message-avatar {
+            background: #667eea;
+        }
+
+        .message.bot .message-avatar {
+            background: #27ae60;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.bot .message-content {
+            background: #f8f9fa;
+            color: #333;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            border-top: 1px solid #e1e5e9;
+            background: #f8f9fa;
+        }
+
+        .chat-input-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+
+        .send-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .quick-actions {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .quick-actions h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .quick-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .quick-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .resources {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .resources h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .resource-link {
+            display: block;
+            padding: 10px;
+            margin-bottom: 8px;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .resource-link:hover {
+            background: #f8f9fa;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 15px 20px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .typing-indicator.show {
+            display: block;
+        }
+
+        .no-chat-history {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .no-chat-history p {
+            margin-bottom: 15px;
+        }
+
+        .start-chat-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .start-chat-btn:hover {
+            background: #219a52;
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 280px 1fr;
+            }
+            
+            .sidebar {
+                order: -1;
+                grid-column: 1 / -1;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .chat-history-panel {
+                order: -1;
+            }
+        }
+    </style>
 </head>
 <body>
-       <!-- Navigation-->
-       <nav class="navbar navbar-expand-lg navbar-dark" id="mainNav" style="background-color: grey;">
-        <div class="container px-4 px-lg-5">
-            <a class="navbar-brand" href="index.html"></a>
-            <div class="collapse navbar-collapse" id="navbarResponsive">
-                <ul class="navbar-nav ms-auto py-4 py-lg-0">
-                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="index.html">Home</a></li>
-                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="about.html">About</a></li>
-                    <li class="nav-item"><a class="nav-link px-lg-3 py-3 py-lg-4" href="contact.html">Contact</a></li>
-                </ul>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>🧠 MindMate</h1>
             </div>
-        </div>
-    </nav>
-    
-    <div class="container" style="margin-top: 100px;">
-       <h3 class="text-center">Start Chatting !</h3>
-        <div class="media" style="background-color: whitesmoke;padding: 15px;">
-            <img src="chatbot.png" style="float: left;margin: 10px;" class="rounded-circle float-left 
-            img-thumbnail" height="40px" width="40px" alt="..."/>
-            <div class="media-body">
-                <h5 style="margin: 10px;">Chatbot</h5>
-                <span style="margin-left: 10px;color:green;">Online</span>
-            </div>
-        </div>
-
-        <div id="chatContainer" class="container border oveflow-auto" style="height: 300px;">
-
-        </div>
-
-        <div class="input-group">
-            <input id="textbox" type="text" class="form-control"/>
-
-            <div class="input-group-append">
-                <button id="sendBtn" type="submit" class="btn btn-primary">send</button>
+            <div class="user-info">
+                <span class="user-name" id="userName">Welcome!</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
         </div>
     </div>
 
-    <!-- <script defer type="text/javascript">
-        
-        var sendBtn = document.getElementById('sendBtn');
-        var textbox = document.getElementById('textbox');
-        var chatContainer = document.getElementById('chatContainer');
+    <div class="main-container">
+        <!-- Chat History Panel -->
+        <div class="chat-history-panel">
+            <div class="chat-history-header">
+                <h3>💬 Chat History</h3>
+            </div>
+            <div class="chat-history-list" id="chatHistoryList">
+                <div class="no-chat-history">
+                    <p>No chat history yet</p>
+                    <button class="start-chat-btn" onclick="startNewChat()">Start Chatting</button>
+                </div>
+            </div>
+        </div>
 
-        var user = {message:""}
-
-        function sendMessage(userMessage){
-
-            var messageElement = document.createElement('div');
-            messageElement.style.textAlign = "right";
-            messageElement.style.margin = "10px";
+        <!-- Main Chat Container -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>MindMate Mental Health Support</h2>
+                <p>Your AI companion for mental wellness</p>
+            </div>
             
-
-            messageElement.innerHTML = "<span> You: </span>"+
-                                    "<span>" +userMessage+ "</span>"
-
-            chatContainer.appendChild(messageElement);
-        }
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        <div>Hello! I'm MindMate, your mental health support companion. I'm here to listen, provide guidance, and help you navigate through any challenges you might be facing. How are you feeling today?</div>
+                        <div class="message-time" id="botTime"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="typing-indicator" id="typingIndicator">
+                MindMate is typing...
+            </div>
+            
+            <div class="chat-input-container">
+                <form class="chat-input-form" id="chatForm">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Type your message here..." required>
+                    <button type="submit" class="send-btn" id="sendBtn">Send</button>
+                </form>
+            </div>
+        </div>
         
-        function chatbotResponse(userMessage){
-                var messageElement = document.createElement('div');
-                messageElement.innerHTML = "<span>Chatbot: </span>"+"<span>"+userMessage+"</span>"
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="quick-actions">
+                <h3>Quick Actions</h3>
+                <button class="quick-btn" onclick="sendQuickMessage('I feel anxious about my studies')">😰 Study Anxiety</button>
+                <button class="quick-btn" onclick="sendQuickMessage('I feel lonely and isolated')">😔 Loneliness</button>
+                <button class="quick-btn" onclick="sendQuickMessage('I have trouble sleeping')">😴 Sleep Issues</button>
+                <button class="quick-btn" onclick="sendQuickMessage('I feel overwhelmed with stress')">😤 Stress Management</button>
+                <button class="quick-btn" onclick="sendQuickMessage('I need motivation to study')">💪 Motivation</button>
+            </div>
+            
+            <div class="resources">
+                <h3>Mental Health Resources</h3>
+                <a href="#" class="resource-link" onclick="showResource('crisis')">🆘 Crisis Helpline</a>
+                <a href="#" class="resource-link" onclick="showResource('meditation')">🧘‍♀️ Meditation Guide</a>
+                <a href="#" class="resource-link" onclick="showResource('breathing')">🫁 Breathing Exercises</a>
+                <a href="#" class="resource-link" onclick="showResource('counseling')">👥 Student Counseling</a>
+                <a href="#" class="resource-link" onclick="showResource('selfcare')">💝 Self-Care Tips</a>
+            </div>
+        </div>
+    </div>
 
-                chatContainer.appendChild(messageElement);
+    <script>
+        let currentChatHistory = [];
+        let selectedHistoryItem = null;
+
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('userToken');
+            const userName = localStorage.getItem('userName');
+            
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            if (userName) {
+                document.getElementById('userName').textContent = `Welcome, ${userName}!`;
+            }
+            
+            // Load chat history after authentication
+            loadChatHistory();
         }
 
-        sendBtn.addEventListener('click',function(e){
-        
-            var userMessage = textbox.value;
-           
-            if(userMessage=="")
-            {
-                alert('Please type in a message');
+        // Load chat history from server
+        async function loadChatHistory() {
+            try {
+                const response = await fetch('/api/chat-history', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('userToken')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentChatHistory = data.chatHistory || [];
+                    displayChatHistory();
+                }
+            } catch (error) {
+                console.error('Error loading chat history:', error);
             }
-            else
-            {
-                let userMessageText = userMessage.trim();
-                user.message = userMessageText;
-                textbox.value="";
-                sendMessage(userMessageText);
-                chatbotResponse(userMessageText);
+        }
+
+        // Display chat history in the left panel
+        function displayChatHistory() {
+            const historyList = document.getElementById('chatHistoryList');
+            
+            if (currentChatHistory.length === 0) {
+                historyList.innerHTML = `
+                    <div class="no-chat-history">
+                        <p>No chat history yet</p>
+                        <button class="start-chat-btn" onclick="startNewChat()">Start Chatting</button>
+                    </div>
+                `;
+                return;
             }
+            
+            // Group messages by conversation (simple grouping by time proximity)
+            const conversations = groupMessagesIntoConversations(currentChatHistory);
+            
+            historyList.innerHTML = conversations.map((conversation, index) => {
+                const firstMessage = conversation[0];
+                const lastMessage = conversation[conversation.length - 1];
+                const isActive = selectedHistoryItem === index;
+                
+                return `
+                    <div class="chat-history-item ${isActive ? 'active' : ''}" onclick="selectConversation(${index})">
+                        <div class="chat-history-message">${firstMessage.message.substring(0, 50)}${firstMessage.message.length > 50 ? '...' : ''}</div>
+                        <div class="chat-history-sender">${firstMessage.sender}</div>
+                        <div class="chat-history-time">${formatTime(lastMessage.timestamp)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
 
-        })
+        // Group messages into conversations (simple time-based grouping)
+        function groupMessagesIntoConversations(messages) {
+            if (messages.length === 0) return [];
+            
+            const conversations = [];
+            let currentConversation = [messages[0]];
+            
+            for (let i = 1; i < messages.length; i++) {
+                const currentMessage = messages[i];
+                const lastMessage = currentConversation[currentConversation.length - 1];
+                
+                // If messages are within 30 minutes, group them together
+                const timeDiff = new Date(currentMessage.timestamp) - new Date(lastMessage.timestamp);
+                if (timeDiff < 30 * 60 * 1000) {
+                    currentConversation.push(currentMessage);
+                } else {
+                    conversations.push(currentConversation);
+                    currentConversation = [currentMessage];
+                }
+            }
+            
+            conversations.push(currentConversation);
+            return conversations.reverse(); // Show newest first
+        }
 
-    </script>         -->
-    <!-- <script src="chatbot.js"></script> -->
-    <script type="module" src="chatbot.js"></script>
+        // Select a conversation from history
+        function selectConversation(index) {
+            selectedHistoryItem = index;
+            displayChatHistory();
+            
+            // Load the selected conversation into the chat
+            const conversations = groupMessagesIntoConversations(currentChatHistory);
+            const selectedConversation = conversations[index];
+            
+            // Clear current chat and load selected conversation
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+            
+            selectedConversation.forEach(msg => {
+                addMessageToChat(msg.message, msg.sender, msg.timestamp);
+            });
+        }
+
+        // Start a new chat
+        function startNewChat() {
+            selectedHistoryItem = null;
+            displayChatHistory();
+            
+            // Clear chat and show welcome message
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = `
+                <div class="message bot">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        <div>Hello! I'm MindMate, your mental health support companion. I'm here to listen, provide guidance, and help you navigate through any challenges you might be facing. How are you feeling today?</div>
+                        <div class="message-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Format timestamp for display
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffInHours = (now - date) / (1000 * 60 * 60);
+            
+            if (diffInHours < 1) {
+                return 'Just now';
+            } else if (diffInHours < 24) {
+                return `${Math.floor(diffInHours)}h ago`;
+            } else {
+                return date.toLocaleDateString();
+            }
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userEmail');
+            window.location.href = '/login.html';
+        }
+
+        // Send quick message
+        function sendQuickMessage(message) {
+            document.getElementById('chatInput').value = message;
+            document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+        }
+
+        // Show resource information
+        function showResource(type) {
+            const resources = {
+                crisis: "🆘 National Crisis Helpline: 988\nAvailable 24/7 for immediate support",
+                meditation: "🧘‍♀️ Try this simple meditation:\n1. Sit comfortably\n2. Close your eyes\n3. Focus on your breath\n4. Start with 5 minutes daily",
+                breathing: "🫁 4-7-8 Breathing Technique:\n1. Inhale for 4 counts\n2. Hold for 7 counts\n3. Exhale for 8 counts\nRepeat 4 times",
+                counseling: "👥 Most universities offer free student counseling services. Check your student health center or counseling department.",
+                selfcare: "💝 Self-care ideas:\n• Take a warm bath\n• Go for a walk\n• Listen to music\n• Practice gratitude\n• Connect with friends"
+            };
+            
+            addMessageToChat(resources[type], 'bot');
+        }
+
+        // Add message to chat display
+        function addMessageToChat(content, sender, timestamp = null) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const avatar = sender === 'user' ? '👤' : '🤖';
+            const time = timestamp ? new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-content">
+                    <div>${content}</div>
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTyping() {
+            document.getElementById('typingIndicator').classList.add('show');
+        }
+
+        function hideTyping() {
+            document.getElementById('typingIndicator').classList.remove('show');
+        }
+
+        // Handle chat form submission
+        document.getElementById('chatForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addMessageToChat(message, 'user');
+            input.value = '';
+            
+            // Disable send button and show typing
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            showTyping();
+            
+            try {
+                const response = await fetch('/v2/api', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('userToken')}`
+                    },
+                    body: JSON.stringify({ inpText: message })
+                });
+                
+                const data = await response.json();
+                
+                // Simulate typing delay
+                setTimeout(() => {
+                    hideTyping();
+                    addMessageToChat(data.message || 'I understand your concern. How can I help you further?', 'bot');
+                    sendBtn.disabled = false;
+                    
+                    // Reload chat history to show new messages
+                    loadChatHistory();
+                }, 1000 + Math.random() * 2000);
+                
+            } catch (error) {
+                hideTyping();
+                addMessageToChat('Sorry, I encountered an error. Please try again.', 'bot');
+                sendBtn.disabled = false;
+            }
+        });
+
+        // Set initial bot message time
+        document.getElementById('botTime').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+        // Check authentication on page load
+        checkAuth();
+    </script>
 </body>
 </html>
