@@ -5,27 +5,5 @@
       "src": "public/**/*",
       "use": "@vercel/static"
     }
-  ],
-  "routes": [
-    {
-      "src": "/chatbot",
-      "dest": "/public/chatbot.html"
-    },
-    {
-      "src": "/about",
-      "dest": "/public/about.html"
-    },
-    {
-      "src": "/contact",
-      "dest": "/public/contact.html"
-    },
-    {
-      "src": "/login",
-      "dest": "/public/login.html"
-    },
-    {
-      "src": "/",
-      "dest": "/public/index.html"
-    }
   ]
 }
