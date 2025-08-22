@@ -417,8 +417,8 @@
                 <h1>🧠 MindMate</h1>
             </div>
             <div class="user-info">
-                <span class="user-name" id="userName">Welcome!</span>
-                <button class="logout-btn" onclick="logout()">Logout</button>
+                <span class="user-name" id="userName">Welcome to MindMate!</span>
+                <button class="logout-btn" onclick="logout()">Home</button>
             </div>
         </div>
     </div>
@@ -494,17 +494,18 @@
 
         // Check authentication
         function checkAuth() {
-            const token = localStorage.getItem('userToken');
-            const userName = localStorage.getItem('userName');
+            // Temporarily disable authentication for Vercel deployment
+            // const token = localStorage.getItem('userToken');
+            // const userName = localStorage.getItem('userName');
             
-            if (!token) {
-                window.location.href = '/login.html';
-                return;
-            }
+            // if (!token) {
+            //     window.location.href = '/login.html';
+            //     return;
+            // }
             
-            if (userName) {
-                document.getElementById('userName').textContent = `Welcome, ${userName}!`;
-            }
+            // if (userName) {
+            //     document.getElementById('userName').textContent = `Welcome, ${userName}!`;
+            // }
             
             // Load chat history after authentication
             loadChatHistory();
@@ -513,17 +514,25 @@
         // Load chat history from server
         async function loadChatHistory() {
             try {
-                const response = await fetch('/api/chat-history', {
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('userToken')}`
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    currentChatHistory = data.chatHistory || [];
+                // Temporarily use localStorage for chat history instead of API calls
+                const savedHistory = localStorage.getItem('chatHistory');
+                if (savedHistory) {
+                    currentChatHistory = JSON.parse(savedHistory);
                     displayChatHistory();
                 }
+                
+                // Original API call (commented out for Vercel deployment)
+                // const response = await fetch('/api/chat-history', {
+                //     headers: {
+                //         'Authorization': `Bearer ${localStorage.getItem('userToken')}`
+                //     }
+                // });
+                
+                // if (response.ok) {
+                //     const data = await response.json();
+                //     currentChatHistory = data.chatHistory || [];
+                //     displayChatHistory();
+                // }
             } catch (error) {
                 console.error('Error loading chat history:', error);
             }
@@ -639,16 +648,65 @@
 
         // Logout function
         function logout() {
-            localStorage.removeItem('userToken');
-            localStorage.removeItem('userName');
-            localStorage.removeItem('userEmail');
-            window.location.href = '/login.html';
+            // Clear chat history and redirect to home
+            localStorage.removeItem('chatHistory');
+            currentChatHistory = [];
+            window.location.href = '/index.html';
         }
 
         // Send quick message
         function sendQuickMessage(message) {
             document.getElementById('chatInput').value = message;
             document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+        }
+
+        // Generate simple bot responses for client-side chat
+        function generateBotResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            // Mental health support responses
+            if (lowerMessage.includes('anxious') || lowerMessage.includes('anxiety')) {
+                return "I understand anxiety can be overwhelming. Try taking deep breaths - inhale for 4 counts, hold for 4, exhale for 4. Remember, it's okay to feel this way. Would you like to talk more about what's causing your anxiety?";
+            } else if (lowerMessage.includes('sad') || lowerMessage.includes('depressed') || lowerMessage.includes('down')) {
+                return "I'm sorry you're feeling this way. Depression is real and it's okay to not be okay. Have you considered talking to a counselor or trusted friend? You don't have to go through this alone.";
+            } else if (lowerMessage.includes('stress') || lowerMessage.includes('overwhelmed')) {
+                return "Stress can feel like too much to handle. Let's break it down - what's one small thing you can do right now to feel better? Maybe take a 5-minute break or go for a short walk?";
+            } else if (lowerMessage.includes('lonely') || lowerMessage.includes('isolated')) {
+                return "Loneliness is really hard, especially as a student. You're not alone in feeling this way. Try reaching out to a classmate, joining a study group, or calling a friend. Small connections can make a big difference.";
+            } else if (lowerMessage.includes('sleep') || lowerMessage.includes('insomnia')) {
+                return "Sleep issues can really affect your mental health. Try establishing a bedtime routine: no screens 1 hour before bed, read a book, or practice relaxation techniques. Would you like some specific sleep tips?";
+            } else if (lowerMessage.includes('study') || lowerMessage.includes('academic')) {
+                return "Academic pressure is real! Remember to take breaks, set realistic goals, and celebrate small wins. What subject are you studying? Maybe we can brainstorm some study strategies together.";
+            } else if (lowerMessage.includes('motivation') || lowerMessage.includes('motivated')) {
+                return "Motivation can be tricky! Sometimes we have to start before we feel motivated. Try the 5-minute rule: commit to just 5 minutes of work, and often you'll want to continue. What would you like to accomplish today?";
+            } else if (lowerMessage.includes('help') || lowerMessage.includes('support')) {
+                return "I'm here to support you! I can help with anxiety, stress, loneliness, sleep issues, and academic challenges. What's on your mind right now?";
+            } else {
+                return "Thank you for sharing that with me. I'm here to listen and support you. How are you really feeling today? Is there something specific you'd like to talk about?";
+            }
+        }
+
+        // Save chat history to localStorage
+        function saveChatHistory() {
+            const chatMessages = document.getElementById('chatMessages');
+            const messages = chatMessages.querySelectorAll('.message');
+            
+            const history = [];
+            messages.forEach(msg => {
+                const isUser = msg.classList.contains('user');
+                const content = msg.querySelector('.message-content div').textContent;
+                const time = msg.querySelector('.message-time').textContent;
+                
+                history.push({
+                    message: content,
+                    sender: isUser ? 'user' : 'bot',
+                    timestamp: new Date().toISOString()
+                });
+            });
+            
+            localStorage.setItem('chatHistory', JSON.stringify(history));
+            currentChatHistory = history;
+            displayChatHistory();
         }
 
         // Show resource information
@@ -713,25 +771,17 @@
             showTyping();
             
             try {
-                const response = await fetch('/v2/api', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('userToken')}`
-                    },
-                    body: JSON.stringify({ inpText: message })
-                });
-                
-                const data = await response.json();
+                // Generate simple bot response for client-side chat
+                const botResponse = generateBotResponse(message);
                 
                 // Simulate typing delay
                 setTimeout(() => {
                     hideTyping();
-                    addMessageToChat(data.message || 'I understand your concern. How can I help you further?', 'bot');
+                    addMessageToChat(botResponse, 'bot');
                     sendBtn.disabled = false;
                     
-                    // Reload chat history to show new messages
-                    loadChatHistory();
+                    // Save chat history to localStorage
+                    saveChatHistory();
                 }, 1000 + Math.random() * 2000);
                 
             } catch (error) {
